@@ -40,7 +40,7 @@ class NaiveBayes():
     """Set priors based on data"""
     ##TODO##
     #total = self._class_counts[i] for i in self._class_counts.keys()
-    print len(self._class_counts.keys())
+    #print len(self._class_counts.keys())
     for i in self._class_counts.keys():
       #print self._priors[i]
       self._priors[i] = self._class_counts[i] / float(sum(self._class_counts.values()))
@@ -62,13 +62,14 @@ class NaiveBayes():
         #print y
         #print word
         #print word+str(y)
+        # More elegant - self._word_couns[(word, y)] = self._word_counts.get((word, y)) + 1
         if word in self._word_counts[y]:
           self._word_counts[y][word] += 1
         else:
           self._word_counts[y][word] = 1
 
     self._class_counts[y] += 1  
-
+    #self._class_counts[y] = self.classcounts.get(y,0) + 1
 
 
   def predict(self, X):
@@ -130,16 +131,32 @@ class NaiveBayes():
       Remember, the log(p1 * p2 * p3) = log p1 + log p2 + log p3
 
     """
-    sum = 0.0
+    sum = 0.0 #- because using log trick otherwise 1
     for word in instance.split():
         #if word in self._word_counts[c]:
         sum += math.log(self._word_counts[c][word] / float(self._class_counts[c]))
     #print sum
     return np.exp(sum + math.log(self._priors[c]))
     ##TODO##
+    """"
+    p_instance_c=1
+    for word in instance.split():
+      if word in self._word_counts.keys() \
+      and c in self._word_counts[word]:
+        p_word_c = float(self._word_counts[c][word]) / self._class_counts[c]
+        p_instance_c *= p_word_c
+
+      #Smoothing - another form of regularization
+      #try:
+      #  p_word_c = float(self._word_counts[c][word]) / self._class_counts[c]
+      #except KeyError:
+      #  p_word_c = 1.0/100000 #lambda smoothing (plus one or plus lambda)
+      #p_instance_c *= p_word_c
+      #return p_instance_c
+      """
 
 if __name__ == '__main__':
-  data = pd.read_csv('train-utf8.csv')
+  data = pd.read_csv('data/train-utf8.csv')
   model = NaiveBayes()
   #print data.Insult.unique()
   model.fit(data.Comment, data.Insult)
@@ -147,4 +164,4 @@ if __name__ == '__main__':
   #print model._word_counts[0] - Print the dictionary with insult = 0
   #print model._class_counts
 
-  print model.predict_proba(["This is not an insult", "You are a big moron"])
+  print model.predict_proba(["This is a fucker an insult", "This is not an insult"])
