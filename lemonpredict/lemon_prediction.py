@@ -14,7 +14,7 @@ class LemonCarFeaturizer():
     self._binarizer = preprocessing.Binarizer()
     self._scaler = preprocessing.StandardScaler()
     self._preprocs = [self._imputer,
-                      self._scaler, 
+                      #self._scaler, 
                       #self._binarizer 
                       ]
 
@@ -45,6 +45,7 @@ class LemonCarFeaturizer():
                   'VehBCost',
                   'BYRNO',
                   'WarrantyCost',
+                  'WheelTypeID',
                   'MMRCurrentRetailCleanPrice'] 
           ]
 
@@ -54,6 +55,15 @@ class LemonCarFeaturizer():
 
     nation = pd.get_dummies(dataset['Nationality'])
     data = pd.concat([data, nation], axis=1)
+
+    prime = pd.get_dummies(dataset['PRIMEUNIT'])
+    data = pd.concat([data, prime], axis=1)
+
+    size = pd.get_dummies(dataset['Size'])
+    data = pd.concat([data, size], axis=1)
+
+    topthree = pd.get_dummies(dataset['TopThreeAmericanName'])
+    data = pd.concat([data, topthree], axis=1)
     #make = pd.get_dummies(dataset['Make'])
     #data = pd.concat([data, make], axis=1)
     #IF training - save set of makes
@@ -68,10 +78,11 @@ class LemonCarFeaturizer():
     return data
 
 def train_model(X, y):
-  model = GradientBoostingClassifier(n_estimators=70)
+  model = GradientBoostingClassifier(n_estimators=150)
   #model = RidgeClassifierCV(alphas=[ 0.1, 1., 10. ])
   #model = LogisticRegression()
   #model = DecisionTreeClassifier() 
+  #model = RandomForestClassifier(n_estimators=200, bootstrap=False,n_jobs=2)
   model.fit(X, y)
   #print model.coef_
   return model
@@ -80,18 +91,18 @@ def predict(model, y):
   return model.predict(y)
 
 def create_submission(model, transformer):
-  submission_test = pd.read_csv('inclass_test.csv')
+  submission_test = pd.read_csv('data/inclass_test.csv') # The test data set file
   predictions = pd.Series([x[1]
     for x in model.predict_proba(transformer.create_features(submission_test))])
 
-  submission = pd.DataFrame({'RefId': submission_test.RefId, 'IsBadBuy': predictions})
+  submission = pd.DataFrame({'RefId': submission_test.RefId, 'IsBadBuy': predictions}) # The output results data set file
   #submission.sort_index(axis=1, inplace=True)
-  submission.to_csv('submission.csv', index=False)
+  submission.to_csv('data/submission.csv', index=False)
 
 
 
 def main():
-  data = pd.read_csv('inclass_training.csv')
+  data = pd.read_csv('data/inclass_training.csv')
   featurizer = LemonCarFeaturizer()
   
   print "Transforming dataset into features..."
