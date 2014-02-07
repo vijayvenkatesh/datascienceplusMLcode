@@ -50,6 +50,8 @@ class LemonCarFeaturizer():
           ]
 
     data['MPY'] = data.VehOdo/ (data.VehYear - data.VehYear.min())
+    data['RetailAuctionDiff'] = data.MMRAcquisitonRetailCleanPrice - data.MMRCurrentRetailCleanPrice
+
     actype = pd.get_dummies(dataset['AUCGUART'])
     data = pd.concat([data, actype], axis=1)
 
@@ -68,6 +70,10 @@ class LemonCarFeaturizer():
     #data = pd.concat([data, make], axis=1)
     #IF training - save set of makes
     # Top 20 makes - and use that
+    topbuyer = set(dataset.BYRNO.value_counts()[:20])
+    dataset['TopBuyer'] = dataset.BYRNO.map(lambda x: x if x in topbuyer else 'other')
+    topbuyers = pd.get_dummies(dataset['TopBuyer'])
+    data = pd.concat([data, topbuyers], axis=1)
 
     print data.head()
 
@@ -78,13 +84,18 @@ class LemonCarFeaturizer():
     return data
 
 def train_model(X, y):
-  model = GradientBoostingClassifier(n_estimators=150)
+  model = GradientBoostingClassifier(n_estimators=170, max_depth=5)
   #model = RidgeClassifierCV(alphas=[ 0.1, 1., 10. ])
   #model = LogisticRegression()
   #model = DecisionTreeClassifier() 
   #model = RandomForestClassifier(n_estimators=200, bootstrap=False,n_jobs=2)
   model.fit(X, y)
   #print model.coef_
+  #Build models and average - 
+  #Build models on subset of data - prices below/above pricepoint
+  #Tiberius
+  #Group by feature and outcome on the dataset
+
   return model
 
 def predict(model, y):
