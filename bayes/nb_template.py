@@ -164,4 +164,4 @@ if __name__ == '__main__':
   #print model._word_counts[0] - Print the dictionary with insult = 0
   #print model._class_counts
 
-  print model.predict_proba(["This is a fucker an insult", "This is not an insult"])
+  print model.predict_proba(["This is a damn insult", "This is not an insult"])
