@@ -75,6 +75,11 @@ class LemonCarFeaturizer():
     topbuyers = pd.get_dummies(dataset['TopBuyer'])
     data = pd.concat([data, topbuyers], axis=1)
 
+    topstate = set(dataset.VNST.value_counts()[:15])
+    dataset['TopStates'] = dataset.VNST.map(lambda x: x if x in topstate else 'other')
+    topstates = pd.get_dummies(dataset['TopStates'])
+    data = pd.concat([data, topstates], axis=1)
+
     print data.head()
 
     if training:
@@ -84,7 +89,7 @@ class LemonCarFeaturizer():
     return data
 
 def train_model(X, y):
-  model = GradientBoostingClassifier(n_estimators=170, max_depth=5)
+  model = GradientBoostingClassifier(n_estimators=200, max_depth=5)
   #model = RidgeClassifierCV(alphas=[ 0.1, 1., 10. ])
   #model = LogisticRegression()
   #model = DecisionTreeClassifier() 
